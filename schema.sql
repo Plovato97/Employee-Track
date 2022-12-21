@@ -1,3 +1,7 @@
+DROP DATABASE IF EXISTS employeeTrack_db;
+CREATE DATABASE employeeTrack_db;
+USE employeeTrack_db;
+
 CREATE TABLE department (
   id INT PRIMARY KEY,
   name VARCHAR(30)
