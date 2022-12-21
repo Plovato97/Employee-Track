@@ -1,5 +1,6 @@
 const mysql = require('mysql2');
 const inquirer = require('inquirer');
+const consoleTable = require('console.table');
 
 const connection = mysql.createConnection({
     host: 'localhost',
@@ -16,37 +17,66 @@ const connection = mysql.createConnection({
     }
     console.log('Successfully connected to database.');
   });
-
-class Database {
-    constructor(connection) {
-      this.connection = connection;
-    }
   
-    async getDepartments() {
-      try {
-        const [results] = await this.connection.query('SELECT * FROM department');
-        return results;
-      } catch (err) {
-        console.error(`Error executing query: ${err.message}`);
-        return null;
+  async function showMenu() {
+    const answer = await inquirer.prompt({
+      type: 'list',
+      name: 'option',
+      message: 'What do you want to do?',
+      choices: [
+        'View all departments',
+        'View all roles',
+        'View all employees',
+        'Add a department',
+        'Add a role',
+        'Add an employee',
+        'Update an employee role',
+        'Quit'
+      ]
+    });
+  
+    return answer.option;
+  }
+  
+  async function main() {
+    while (true) {
+      const option = await showMenu();
+      switch (option) {
+        case 'View all departments':
+          await viewDepartments();
+          break;
+        case 'View all roles':
+          await viewRoles();
+          break;
+        case 'View all employees':
+          await viewEmployees();
+          break;
+        case 'Add a department':
+          await addDepartment();
+          break;
+        case 'Add a role':
+          await addRole();
+          break;
+        case 'Add an employee':
+          await addEmployee();
+          break;
+        case 'Update an employee role':
+          await updateEmployeeRole();
+          break;
+        case 'Quit':
+          return;
       }
     }
   }
   
-  const database = new Database(connection);
-  const departments = await database.getDepartments();
-  console.log(departments);
   
-
-  const departmentName = await inquirer.prompt({
-    type: 'input',
-    name: 'name',
-    message: 'Enter the name of the department:'
-  });
-  
-  try {
-    await this.connection.query('INSERT INTO department (name) VALUES (?)', [departmentName]);
-    console.log('Department added successfully.');
-  } catch (err) {
-    console.error(`Error adding department: ${err.message}`);
+  async function viewDepartments() {
+    try {
+      const [results] = await connection.query('SELECT * FROM department');
+      console.table(results);
+    } catch (err) {
+      console.error(`Error viewing departments: ${err.message}`);
+    }
   }
+  main();
+  
