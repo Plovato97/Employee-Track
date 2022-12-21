@@ -24,3 +24,11 @@ CREATE TABLE employee (
   FOREIGN KEY (role_id) REFERENCES role(id),
   FOREIGN KEY (manager_id) REFERENCES employee(id)
 );
+
+-- vlaues for departments table --
+INSERT INTO departments (name) VALUES 
+('Engineer'),
+('Sales'),
+('HR'),
+('Legal');
+('Customer Service')
