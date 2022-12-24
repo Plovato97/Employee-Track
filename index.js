@@ -7,7 +7,7 @@ const connection = mysql.createConnection({
     port: 3306,
     user: 'root',
     password: 'password',
-    database: 'employeeTrack_db'
+    database: 'employeetrack_db'
 });
 
 connection.connect((err) => {
@@ -51,7 +51,7 @@ async function main() {
                 break;
             case 'View all employees':
                 await viewEmployees();
-                break;
+                break; 
             case 'Add a department':
                 await addDepartment();
                 break;
@@ -70,38 +70,34 @@ async function main() {
     }
 }
 
+//   Get all roles
 // Class for interacting with the database
 class Database {
     constructor(connection) {
         this.connection = connection;
     }
-}
-//   Get all roles
-function viewRoles() {
-    // Check if the connection is closed
-    if (connection.state === 'disconnected') {
-        // Connect to the database
-        connection.connect((err) => {
-            if (err) {
-                console.error(`Error connecting to database: ${err.message}`);
-                return;
-            }
-            console.log('Successfully connected to database.');
-        });
-    }
 
-    return new Promise((resolve, reject) => {
-        connection.query('SELECT * FROM role', (error, results) => {
-            if (error) {
-                console.error(`Error viewing roles: ${error.message}`);
-                reject(error);
-            } else {
-                console.table(results);
-                resolve(results);
-            }
-        });
-    });
-}
+    //   Get all roles
+    async viewRoles() {
+        try {
+            const [results] = await connection.promise().query('SELECT * FROM role');
+            console.table(results);
+            return results;
+        } catch (err) {
+            console.error(`Error viewing roles: ${err.message}`);
+            return err;
+        }
+    }
+    }
+    
+    // Create a new instance of the Database class
+    const db = new Database(connection);
+    
+    // View all roles in the database
+    async function viewRoles() {
+    const roles = await db.viewRoles();
+    return roles;
+    }
 
 // Get all employees
 async function viewEmployees() {
@@ -118,8 +114,8 @@ async function viewEmployees() {
     }
 
     try {
-        const [results] = await connection.query('SELECT * FROM employee');
-        console.table(results);
+        const [result] = await connection.promise().query('SELECT * FROM employee');
+        console.table(result);
     } catch (err) {
         console.error(`Error viewing employees: ${err.message}`);
     }
@@ -128,25 +124,13 @@ async function viewEmployees() {
 // view all departments
 async function viewDepartments() {
     try {
-      const [results] = await connection.query('SELECT * FROM department');
+      const [results] = await connection.promise().query('SELECT * FROM department');
       console.table(results);
     } catch (err) {
       console.error(`Error viewing departments: ${err.message}`);
     }
   }
   
-
-return new Promise((resolve, reject) => {
-    connection.query('SELECT * FROM department', (error, results) => {
-        if (error) {
-            console.error(`Error viewing departments: ${error.message}`);
-            reject(error);
-        } else {
-            console.table(results);
-            resolve(results);
-        }
-    });
-});
 //   add a department
 async function addDepartment() {
     // Prompt the user for the department details
@@ -158,7 +142,7 @@ async function addDepartment() {
 
     try {
         // Insert the department into the database
-        const result = await connection.query('INSERT INTO department (name) VALUES (?)', [departmentDetails.name]);
+        const result = await connection.promise().query('INSERT INTO department (name) VALUES (?)', [departmentDetails.name]);
         console.log(`Department with ID ${result.insertId} added successfully.`);
     } catch (err) {
         console.error(`Error adding department: ${err.message}`);
@@ -197,7 +181,7 @@ async function addRole() {
 
     // Add the role to the database
     try {
-        await connection.query('INSERT INTO role (title, salary, department_id) VALUES (?, ?, ?)', [roleDetails.title, roleDetails.salary, roleDetails.department]);
+        await connection.promise().query('INSERT INTO role (title, salary, department_id) VALUES (?, ?, ?)', [roleDetails.title, roleDetails.salary, roleDetails.department]);
         console.log('Role added successfully.');
     } catch (err) {
         console.error(`Error adding role: ${err.message}`);
@@ -242,7 +226,7 @@ async function addEmployee() {
 
     // Add the employee to the database
     try {
-        await connection.query('INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)', [employeeDetails.firstName, employeeDetails.lastName, employeeDetails.role, employeeDetails.manager]);
+        await connection.promise().query('INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)', [employeeDetails.firstName, employeeDetails.lastName, employeeDetails.role, employeeDetails.manager]);
         console.log('Employee added successfully.');
     } catch (err) {
         console.error(`Error adding employee: ${err.message}`);
